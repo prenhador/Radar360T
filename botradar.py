@@ -79,7 +79,7 @@ for uf in ufs:
             time.sleep(2)
 
 # ==============================================================
-# O MÉTODO INFALÍVEL DE GRAVAÇÃO
+# O MÉTODO BLINDADO DE GRAVAÇÃO (IGNORA ESPAÇOS E TABULAÇÕES)
 # ==============================================================
 try:
     if len(raw_data) > 0:
@@ -88,16 +88,16 @@ try:
 
         data_json = json.dumps(raw_data, ensure_ascii=False)
         
-        # 1. Primeiro, garantimos que transformamos os dados velhos (se existirem) num array vazio
-        html = re.sub(r'let rawData = \[.*?\];', 'let rawData = [];', html, flags=re.DOTALL)
-        
-        # 2. Agora fazemos a substituição exata da string, sem margem para erro
-        html = html.replace('let rawData = [];', f'let rawData = {data_json};')
+        # O "coração" da correção: regex inteligente que ignora formatação e espaços invisíveis
+        novo_html = re.sub(r'let\s+rawData\s*=\s*\[.*?\]\s*;', lambda m: f'let rawData = {data_json};', html, flags=re.DOTALL)
 
-        with open('index.html', 'w', encoding='utf-8') as f:
-            f.write(html)
-            
-        print(f"\n🎉 GRAVADO! {len(raw_data)} radares injetados no arquivo HTML fisicamente.")
+        # Verificação de segurança (Se o texto não mudou, ele avisa o erro)
+        if novo_html == html:
+            print("\n❌ ERRO FATAL: O Python não encontrou a linha 'let rawData' no HTML para injetar os dados!")
+        else:
+            with open('index.html', 'w', encoding='utf-8') as f:
+                f.write(novo_html)
+            print(f"\n🎉 GRAVADO COM SUCESSO! {len(raw_data)} radares injetados.")
     else:
         print("\n❌ ERRO: O Robô não baixou nenhum radar.")
 except Exception as e:
