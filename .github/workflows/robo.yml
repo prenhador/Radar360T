@@ -19,7 +19,7 @@ jobs:
           python-version: '3.x'
 
       - name: Baixar XMLs e Atualizar Dashboard
-        run: python atualizador.py
+        run: python botradar.py
 
       - name: Guardar as alterações no GitHub
         run: |
