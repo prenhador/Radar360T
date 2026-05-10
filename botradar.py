@@ -6,7 +6,7 @@ import re
 from datetime import datetime
 import time
 
-# Apenas Paraná por agora
+# Apenas Paraná para o teste
 ufs = ['PR']
 raw_data = []
 
@@ -34,20 +34,35 @@ def get_regiao_classe(uf):
 
 for uf in ufs:
     url_oficial = f"https://servicos.rbmlq.gov.br/dados-abertos/{uf}/medidores.xml"
+    
+    # NOVOS PROXIES (Muito mais fortes contra bloqueios)
     urls_para_tentar = [
+        f"https://corsproxy.io/?{urllib.parse.quote(url_oficial)}",
         f"https://api.allorigins.win/raw?url={urllib.parse.quote(url_oficial)}",
-        f"https://api.codetabs.com/v1/proxy?quest={urllib.parse.quote(url_oficial)}",
-        url_oficial
+        f"https://api.codetabs.com/v1/proxy?quest={urllib.parse.quote(url_oficial)}"
     ]
     
     sucesso = False
     for i, tentativa_url in enumerate(urls_para_tentar):
         if sucesso: break
         try:
-            print(f"Baixando {uf} (Tentativa {i+1}/3)...")
-            req = urllib.request.Request(tentativa_url, headers={'User-Agent': 'Mozilla/5.0'})
+            print(f"Baixando {uf} (Proxy {i+1})...")
+            # Truque: Usar um User-Agent de um celular Chrome para fingir que é um utilizador normal
+            req = urllib.request.Request(tentativa_url, headers={
+                'User-Agent': 'Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+            })
+            
             response = urllib.request.urlopen(req, timeout=40)
-            root = ET.fromstring(response.read())
+            xml_content = response.read()
+            
+            # Verificar se o servidor mandou um aviso de erro em vez do XML
+            if b'<html' in xml_content[:50]:
+                print(f"-> O Proxy {i+1} devolveu uma página de bloqueio HTML em vez do XML.")
+                continue
+
+            root = ET.fromstring(xml_content)
             
             for medidor in root.findall('DadosAbertosMedidoresVelocidade'):
                 local = get_text(medidor, 'LocalVerificacao')
@@ -76,12 +91,11 @@ for uf in ufs:
             sucesso = True
             print(f"-> Sucesso em {uf}!")
         except Exception as e:
-            # AGORA ELE VAI GRITAR O ERRO EXATO!
-            print(f"-> Falha na tentativa {i+1}: {e}")
-            time.sleep(2)
+            print(f"-> Falha no Proxy {i+1}: {e}")
+            time.sleep(3)
 
 # ==============================================================
-# O MÉTODO BLINDADO DE GRAVAÇÃO
+# GRAVAÇÃO
 # ==============================================================
 try:
     if len(raw_data) > 0:
@@ -98,6 +112,6 @@ try:
                 f.write(novo_html)
             print(f"\n🎉 GRAVADO COM SUCESSO! {len(raw_data)} radares injetados.")
     else:
-        print("\n❌ ERRO: O Robô não baixou nenhum radar. O site do INMETRO deve estar offline.")
+        print("\n❌ ERRO: O Robô não baixou nenhum radar. Bloqueio mantido pelo Governo.")
 except Exception as e:
-    print(f"Erro Crítico ao tentar gravar o arquivo: {e}")
+    print(f"Erro Crítico: {e}")
