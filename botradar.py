@@ -7,9 +7,9 @@ import zipfile
 import io
 import glob
 import os
+import time
 
 raw_data = []
-# Todos os 27 estados para mandar no POST
 UFS = ["AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT","PA","PB","PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"]
 
 def get_text(elem, tag):
@@ -30,49 +30,59 @@ def get_regiao_classe(uf):
     return ''
 
 # ==============================================================
-# 1. BAIXAR E EXTRAIR O ZIP AO VIVO (A SUA DESCOBERTA!)
+# 1. BAIXAR E EXTRAIR O ZIP AO VIVO (1 ESTADO POR VEZ)
 # ==============================================================
-try:
-    url = "https://servicos.rbmlq.gov.br/Instrumento/Download"
-    data = [("SelectedTipoClassificacaoInstrumento", "322")] # 322 = Medidor de Velocidade
-    data += [("SelectedEstados", uf) for uf in UFS]
-    data.append(("extensao", "xml"))
+os.makedirs("xml_temp", exist_ok=True)
+url = "https://servicos.rbmlq.gov.br/Instrumento/Download"
 
-    print("🚀 A solicitar ZIP com os radares de todo o Brasil ao vivo...")
-    resp = requests.post(url, data=data, timeout=120)
-    resp.raise_for_status()
-    
-    # Extrai tudo para uma pasta temporária invisível no servidor
-    os.makedirs("xml_temp", exist_ok=True)
-    with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
-        zf.extractall("xml_temp")
-    print("📦 Arquivos ZIP baixados e extraídos com sucesso!")
-    
-except Exception as e:
-    print(f"❌ Falha no download ou extração: {e}")
-    exit(1)
+# Finge ser um navegador para evitar bloqueios simples
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+}
+
+print("🚀 A iniciar download dos estados (1 por vez)...")
+
+for uf in UFS:
+    try:
+        data = {
+            "SelectedTipoClassificacaoInstrumento": "322",
+            "SelectedEstados": uf,
+            "extensao": "xml"
+        }
+        resp = requests.post(url, data=data, headers=headers, timeout=30)
+        resp.raise_for_status()
+        
+        # Só tenta extrair se o servidor não enviar um arquivo vazio
+        if len(resp.content) > 100: 
+            with zipfile.ZipFile(io.BytesIO(resp.content)) as zf:
+                zf.extractall("xml_temp")
+            print(f"  ✅ {uf} baixado e extraído.")
+        else:
+            print(f"  ⚠️ {uf} veio vazio (sem radares).")
+            
+        time.sleep(1) # Pausa dramática para não levar block do Inmetro
+    except Exception as e:
+        print(f"  ❌ Erro ao baixar {uf}: {e}")
 
 # ==============================================================
-# 2. LER E PROCESSAR OS XMLs
+# 2. LER E PROCESSAR OS XMLs EXTRAÍDOS
 # ==============================================================
 arquivos_xml = glob.glob('xml_temp/*.xml')
+print(f"\nA processar {len(arquivos_xml)} ficheiros XML...")
 
 for arquivo in arquivos_xml:
     try:
-        print(f"A ler o {arquivo}...")
         with open(arquivo, 'r', encoding='utf-8') as f:
             xml_content = f.read()
         
-        # O DF costuma vir vazio, previne que o Python dê erro a tentar ler nada
         if not xml_content.strip():
-            print(f"  -> Ignorado: O arquivo {arquivo} está vazio.")
             continue
 
         root = ET.fromstring(xml_content)
         
         for medidor in root.findall('DadosAbertosMedidoresVelocidade'):
             uf = get_text(medidor, 'SiglaUf')
-            if not uf: continue # Ignora se não tiver estado
+            if not uf: continue 
             
             local = get_text(medidor, 'LocalVerificacao')
             data = get_text(medidor, 'DataValidade')
