@@ -41,10 +41,10 @@ for uf in ufs:
     ]
     
     sucesso = False
-    for tentativa_url in urls_para_tentar:
+    for i, tentativa_url in enumerate(urls_para_tentar):
         if sucesso: break
         try:
-            print(f"Baixando {uf}...")
+            print(f"Baixando {uf} (Tentativa {i+1}/3)...")
             req = urllib.request.Request(tentativa_url, headers={'User-Agent': 'Mozilla/5.0'})
             response = urllib.request.urlopen(req, timeout=40)
             root = ET.fromstring(response.read())
@@ -75,11 +75,13 @@ for uf in ufs:
                 })
             sucesso = True
             print(f"-> Sucesso em {uf}!")
-        except:
+        except Exception as e:
+            # AGORA ELE VAI GRITAR O ERRO EXATO!
+            print(f"-> Falha na tentativa {i+1}: {e}")
             time.sleep(2)
 
 # ==============================================================
-# O MÉTODO BLINDADO DE GRAVAÇÃO (IGNORA ESPAÇOS E TABULAÇÕES)
+# O MÉTODO BLINDADO DE GRAVAÇÃO
 # ==============================================================
 try:
     if len(raw_data) > 0:
@@ -87,18 +89,15 @@ try:
             html = f.read()
 
         data_json = json.dumps(raw_data, ensure_ascii=False)
-        
-        # O "coração" da correção: regex inteligente que ignora formatação e espaços invisíveis
         novo_html = re.sub(r'let\s+rawData\s*=\s*\[.*?\]\s*;', lambda m: f'let rawData = {data_json};', html, flags=re.DOTALL)
 
-        # Verificação de segurança (Se o texto não mudou, ele avisa o erro)
         if novo_html == html:
-            print("\n❌ ERRO FATAL: O Python não encontrou a linha 'let rawData' no HTML para injetar os dados!")
+            print("\n❌ ERRO FATAL: O Python não encontrou a linha 'let rawData' no HTML!")
         else:
             with open('index.html', 'w', encoding='utf-8') as f:
                 f.write(novo_html)
             print(f"\n🎉 GRAVADO COM SUCESSO! {len(raw_data)} radares injetados.")
     else:
-        print("\n❌ ERRO: O Robô não baixou nenhum radar.")
+        print("\n❌ ERRO: O Robô não baixou nenhum radar. O site do INMETRO deve estar offline.")
 except Exception as e:
     print(f"Erro Crítico ao tentar gravar o arquivo: {e}")
