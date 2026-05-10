@@ -20,8 +20,7 @@ def get_regiao_classe(uf):
     return ''
 
 try:
-    print("A ler o ficheiro local PR.xml...")
-    # Lê o ficheiro diretamente da pasta do GitHub
+    print("A ler o arquivo local PR.xml...")
     with open('PR.xml', 'r', encoding='utf-8') as f:
         xml_content = f.read()
     
@@ -51,28 +50,24 @@ try:
                 'marcaModelo': get_text(medidor, 'TipoMedidor'), 'faixas': [], 'historico': []
             }
         })
-    print(f"-> Sucesso! {len(raw_data)} radares lidos do PR.xml local.")
+    print(f"-> Sucesso! {len(raw_data)} radares processados.")
 except Exception as e:
-    print(f"-> Falha ao ler o ficheiro local: {e}")
+    print(f"-> Falha ao processar os dados: {e}")
 
 # ==============================================================
-# GRAVAÇÃO (O Método Blindado que já validámos que funciona!)
+# NOVA ARQUITETURA: GRAVAR OS DADOS NUM ARQUIVO SEPARADO
 # ==============================================================
 try:
     if len(raw_data) > 0:
-        with open('index.html', 'r', encoding='utf-8') as f:
-            html = f.read()
-
         data_json = json.dumps(raw_data, ensure_ascii=False)
-        novo_html = re.sub(r'let\s+rawData\s*=\s*\[.*?\]\s*;', lambda m: f'let rawData = {data_json};', html, flags=re.DOTALL)
-
-        if novo_html == html:
-            print("\n❌ ERRO FATAL: O Python não encontrou a linha 'let rawData' no HTML!")
-        else:
-            with open('index.html', 'w', encoding='utf-8') as f:
-                f.write(novo_html)
-            print(f"\n🎉 GRAVADO COM SUCESSO! {len(raw_data)} radares injetados.")
+        # O Robô agora escreve o JS puro. O HTML vai carregar isto como um script.
+        js_content = f"window.DADOS_DO_ROBO = {data_json};"
+        
+        with open('dados.js', 'w', encoding='utf-8') as f:
+            f.write(js_content)
+            
+        print(f"\n🎉 ARQUITETURA NOVA! dados.js criado/atualizado com sucesso com {len(raw_data)} radares.")
     else:
-        print("\n❌ ERRO: Nenhum radar encontrado no ficheiro PR.xml.")
+        print("\n❌ ERRO: Nenhum dado processado.")
 except Exception as e:
     print(f"Erro Crítico: {e}")
