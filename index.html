@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar Nacional 360° - Dashboard Profissional</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1a1f2e;
+            --bg-card: #232b3d;
+            --bg-card-lighter: #2d3548;
+            --border: #3d4556;
+            --border-light: #4a5369;
+            --text-primary: #f0f4f8;
+            --text-secondary: #b8c5d6;
+            --text-muted: #8b96a8;
+            
+            --pastel-cyan: #7dd3fc;
+            --pastel-sky: #60a5fa;
+            --pastel-blue: #3b82f6;
+            --pastel-emerald: #6ee7b7;
+            --pastel-green: #34d399;
+            --pastel-amber: #fcd34d;
+            --pastel-yellow: #fbbf24;
+            --pastel-rose: #fda4af;
+            --pastel-pink: #f472b6;
+            --pastel-purple: #c084fc;
+            --pastel-violet: #a78bfa;
+            
+            --success: #6ee7b7;
+            --danger: #fda4af;
+            --warning: #fcd34d;
+            
+            --region-sul: #7dd3fc;
+            --region-sudeste: #6ee7b7;
+            --region-centro: #fcd34d;
+            --region-norte: #fda4af;
+            
+            --federal: #60a5fa;
+            --rodovias: #c084fc;
+            --urbano: #fda4af;
+            
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .main-header {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: visible; 
+            width: 100%;
+            min-width: 0;
+        }
+
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--pastel-cyan), var(--pastel-sky), var(--pastel-emerald));
+        }
+
+        .header-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            width: 100%;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1 1 100%;
+            min-width: 0;
+        }
+
+        .header-icon {
+            font-size: 3.5rem;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .header-title-section {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .header-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: nowrap;
+            justify-content: space-between; /* Mantém titulo e engrenagem nas pontas no mobile */
+            width: 100%;
+        }
+
+        .header-title-row h1 {
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            letter-spacing: -0.02em;
+            word-wrap: break-word;
+        }
+
+        .header-title-row h1 .highlight {
+            color: var(--pastel-cyan);
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-btn-icon {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dropdown-btn-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--border-light);
+            transform: scale(1.05);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0; /* Abre para a esquerda a partir da engrenagem para não vazar a tela */
+            top: 130%;
+            background-color: var(--bg-card);
+            min-width: 250px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            z-index: 1000;
+            flex-direction: column;
+            overflow: visible; 
+        }
+
+        .dropdown-content.show {
+            display: flex;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-item {
+            background: none;
+            color: var(--text-primary);
+            padding: 16px 20px;
+            text-align: left;
+            border: none;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.95rem;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative; 
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .dropdown-item:last-child { border-bottom: none; border-radius: 0 0 var(--radius-md) var(--radius-md); }
+        .dropdown-item:first-child { border-radius: var(--radius-md) var(--radius-md) 0 0; }
+        .dropdown-item:hover { background: rgba(125, 211, 252, 0.1); color: var(--pastel-cyan); padding-left: 24px; }
+
+        /* --- TOOLTIPS DENTRO DO DROPDOWN (DESKTOP) --- */
+        .tooltip-side {
+            visibility: hidden;
+            width: max-content;
+            max-width: 280px;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            text-align: left;
+            border-radius: var(--radius-md);
+            padding: 16px;
+            position: absolute;
+            z-index: 1001;
+            right: 105%; /* Aparece à ESQUERDA do menu no Desktop para não vazar a tela principal */
+            top: 0;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-light);
+            font-size: 0.8rem;
+            line-height: 1.5;
+            pointer-events: none;
+            white-space: normal;
+        }
+
+        .dropdown-item:hover .tooltip-side {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip-title {
+            font-weight: 700;
+            color: var(--pastel-cyan);
+            margin-bottom: 10px;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .tooltip-side ol { margin: 0; padding-left: 20px; }
+        .tooltip-side li { margin-bottom: 6px; }
+        .tooltip-side li:last-child { margin-bottom: 0; }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .search-badge {
+            background: rgba(125, 211, 252, 0.15);
+            border: 1px solid rgba(125, 211, 252, 0.3);
+            color: var(--pastel-cyan);
+            padding: 3px 10px;
+            border-radius: 16px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .download-section {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-top: 20px;
+            animation: slideDown 0.3s ease-out;
+            width: 100%;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .download-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--pastel-cyan);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .regions-wrapper {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .region-block {
+            background: var(--bg-card-lighter);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            height: fit-content;
+        }
+
+        .region-name {
+            padding: 14px 20px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .region-name:hover {
+            background: rgba(125, 211, 252, 0.1);
+            color: var(--pastel-cyan);
+        }
+
+        .region-arrow {
+            font-size: 0.7rem;
+            transition: transform 0.3s;
+        }
+
+        .region-arrow.active { transform: rotate(180deg); }
+
+        .ufs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 8px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .uf-download-btn {
+            padding: 10px 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: block;
+        }
+
+        .uf-download-btn:hover {
+            background: linear-gradient(135deg, var(--pastel-cyan), var(--pastel-sky));
+            color: #1a1f2e;
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(125, 211, 252, 0.3);
+        }
+
+        .steps-container {
+            display: flex;
+            flex-direction: column; 
+            gap: 24px;
+            margin-bottom: 32px;
+            width: 100%;
+        }
+
+        .step-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box; 
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            color: #1a1f2e;
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .filters-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .filter-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .filters-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 2fr;
+            gap: 16px;
+            align-items: end;
+            width: 100%;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-card-lighter);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            font-family: 'DM Sans', sans-serif;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23b8c5d6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+            cursor: pointer;
+            padding-right: 40px;
+        }
+
+        select option {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            padding: 10px;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--pastel-cyan);
+            background: rgba(125, 211, 252, 0.05);
+        }
+
+        .action-buttons-inline {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .action-btn-compact {
+            flex: 1;
+            min-width: 80px;
+            padding: 14px 16px;
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0.6;
+            color: white;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .action-btn-compact.active {
+            opacity: 1;
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        .via-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+        }
+
+        .via-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border: 2px solid;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .via-item.federal { background: rgba(96, 165, 250, 0.15); border-color: var(--federal); color: var(--federal); }
+        .via-item.rodovias { background: rgba(192, 132, 252, 0.15); border-color: var(--rodovias); color: var(--rodovias); }
+        .via-item.urbano { background: rgba(253, 164, 175, 0.15); border-color: var(--urbano); color: var(--urbano); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 20px;
+            margin-bottom: 32px;
+            width: 100%;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--pastel-cyan), var(--pastel-emerald));
+        }
+        
+        .stat-label {
+            font-size: 0.85rem; 
+            color: var(--text-secondary); 
+            text-transform: uppercase; 
+            font-weight: 600; 
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--pastel-cyan), var(--pastel-emerald));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            display: block;
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th { padding: 18px 20px; text-align: left; font-size: 0.8rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); text-transform: uppercase; cursor: pointer; white-space: nowrap;}
+        
+        td { padding: 18px 20px; color: var(--text-primary); font-size: 0.9rem; border-bottom: 1px solid var(--border); word-wrap: break-word; }
+        
+        tbody tr:hover { background: rgba(125, 211, 252, 0.05); cursor: pointer; }
+
+        .badge { padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; white-space: nowrap; }
+        .badge-regular { background: rgba(110, 231, 183, 0.15); color: var(--success); }
+        .badge-vencido { background: rgba(253, 164, 175, 0.15); color: var(--danger); }
+        .badge-instalado { background: rgba(125, 211, 252, 0.15); color: var(--pastel-cyan); }
+
+        .badge-federal { background: rgba(96, 165, 250, 0.15); color: var(--federal); font-size: 0.7rem; border-radius: 12px; padding: 4px 10px; white-space: nowrap; }
+        .badge-rodovias { background: rgba(192, 132, 252, 0.15); color: var(--rodovias); font-size: 0.7rem; border-radius: 12px; padding: 4px 10px; white-space: nowrap; }
+        .badge-urbano { background: rgba(253, 164, 175, 0.15); color: var(--urbano); font-size: 0.7rem; border-radius: 12px; padding: 4px 10px; white-space: nowrap; }
+
+        .btn-imprimir {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(125, 211, 252, 0.1);
+            color: var(--pastel-cyan);
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(125, 211, 252, 0.3);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-imprimir:hover { background: rgba(125, 211, 252, 0.2); transform: translateY(-1px); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; box-sizing: border-box;}
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--bg-card); width: 100%; max-width: 1100px; max-height: 95vh; border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; }
+        .modal-header { padding: 20px 24px; background: var(--bg-dark); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h2 { font-size: clamp(1.2rem, 3vw, 1.5rem); margin: 0; }
+        .modal-body { padding: 24px; overflow-y: auto; }
+
+        .ficha-header-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .fh-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            word-break: break-word;
+        }
+
+        .fh-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px; }
+        .fh-val { font-size: 0.95rem; color: var(--text-primary); font-weight: 500; }
+        .fh-val strong { color: var(--pastel-cyan); font-weight: 700; }
+
+        .section-title { font-size: 1.15rem; color: var(--pastel-cyan); margin: 24px 0 16px 0; padding-bottom: 8px; border-bottom: 2px solid var(--border); font-weight: 600; }
+
+        .nested-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            min-width: 600px;
+        }
+
+        .nested-table th {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 14px 16px;
+            font-size: 0.8rem;
+            text-align: left;
+        }
+
+        .nested-table td {
+            padding: 14px 16px;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nested-table tr:last-child td { border-bottom: none; }
+
+        .toast { position: fixed; bottom: 24px; right: 24px; background: linear-gradient(135deg, var(--pastel-cyan), var(--pastel-emerald)); color: #1a1f2e; padding: 16px 24px; border-radius: var(--radius-md); z-index: 2000; display: flex; gap: 12px; font-weight: 700; }
+        
+        .uf-sul { color: var(--region-sul) !important; font-weight: 700; }
+        .uf-sudeste { color: var(--region-sudeste) !important; font-weight: 700; }
+        .uf-centro { color: var(--region-centro) !important; font-weight: 700; }
+        .uf-norte { color: var(--region-norte) !important; font-weight: 700; }
+
+        /* ======== MEDIA QUERIES (MOBILE & TABLET) ======== */
+        @media (max-width: 992px) {
+            .header-content { flex-direction: column; align-items: stretch; text-align: center; }
+            .header-left { justify-content: center; flex-direction: column; gap: 10px; }
+            .header-title-row { justify-content: center; }
+            .filters-row { grid-template-columns: 1fr 1fr; }
+            .action-buttons-inline { grid-column: 1 / -1; } 
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            .main-header { padding: 24px 16px; margin-bottom: 24px; border-radius: 12px; }
+            .step-card { padding: 20px 12px; border-radius: 12px; }
+            
+            /* Ajuste Header Mobile */
+            .header-left { flex-direction: column; align-items: flex-start; text-align: left; }
+            .header-title-row { width: 100%; }
+            .header-icon { display: none; } /* Oculta o abacaxi/radar para poupar espaço no mobile se quiser, ou comente esta linha */
+            
+            /* -- MENU GERENCIAR MOBILE -- */
+            .dropdown-content { right: 0; left: auto; width: 260px; top: 120%; } /* Evita estourar lateral no mobile */
+            
+            /* Removemos os Tooltips flutuantes no mobile para não estourar a tela horizontalmente */
+            .tooltip-side { display: none !important; }
+            
+            /* Dica Informativa permanente no mobile dentro do menu */
+            .mobile-help-text {
+                display: block;
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                padding: 10px 20px 16px 20px;
+                line-height: 1.4;
+                border-bottom: 1px solid var(--border);
+                background: rgba(0,0,0,0.1);
+            }
+
+            .regions-wrapper { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .region-name { padding: 12px; font-size: 0.85rem; }
+            .ufs-container { grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); padding: 12px; gap: 6px; }
+            .uf-download-btn { padding: 8px 4px; font-size: 0.75rem; }
+
+            .filter-label { display: none; } 
+            
+            .filters-row { 
+                display: flex; 
+                flex-direction: row; 
+                flex-wrap: nowrap; 
+                gap: 6px; 
+                align-items: stretch;
+                overflow-x: auto; 
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding-bottom: 4px;
+            }
+            .filters-row::-webkit-scrollbar { display: none; }
+            
+            .filter-group { flex: 1; min-width: 80px; }
+            .action-buttons-inline { flex: 1.5; flex-wrap: nowrap; gap: 4px; width: auto; }
+            
+            select {
+                padding: 10px 20px 10px 8px !important;
+                font-size: 0.75rem !important;
+                background-size: 12px !important;
+                background-position: right 4px center !important;
+                height: 100%;
+                text-overflow: ellipsis;
+            }
+
+            .action-btn-compact { flex: 1; min-width: 0; padding: 10px 4px; font-size: 0.75rem; letter-spacing: -0.5px; }
+
+            .via-selector { flex-wrap: nowrap; gap: 6px; padding: 12px 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+            .via-selector::-webkit-scrollbar { display: none; }
+            .via-item { width: auto; flex: 1; padding: 8px 6px; font-size: 0.75rem; justify-content: center; white-space: nowrap; letter-spacing: -0.5px; }
+
+            .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+            .stat-card { padding: 12px 4px; }
+            .stat-label { font-size: 0.65rem; margin-bottom: 4px; line-height: 1.2; letter-spacing: -0.5px; }
+            .stat-value { font-size: 1.25rem; }
+            
+            .modal-body { padding: 16px; }
+            .modal-header { padding: 16px; }
+            .fh-item { padding: 12px; }
+            th, td { padding: 12px 14px; font-size: 0.85rem; }
+        }
+
+        /* Ocultar dica permanente de mobile no Desktop */
+        @media (min-width: 769px) {
+            .mobile-help-text { display: none; }
+        }
+    </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1f2e">
+</head>
+<body>
+
+<div class="container">
+    <header class="main-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="header-icon">🍍</div>
+                <div class="header-title-section">
+                    
+                    <div class="header-title-row">
+                        <h1>Radar <span class="highlight">Nacional 360°</span></h1>
+                        
+                        <div class="dropdown" id="gerenciarDropdown">
+                            <button class="dropdown-btn-icon" onclick="toggleMenu(event)" title="Gerenciar Dashboard">
+                                ⚙️
+                            </button>
+                            
+                            <div class="dropdown-content" id="menuContent">
+                                <div class="mobile-help-text">
+                                    💡 <strong>Ajuda:</strong> Baixe o arquivo XML, abra esta aba, selecione o XML e os dados carregarão sozinhos.
+                                </div>
+
+                                <button class="dropdown-item" onclick="toggleDownloadSection(event)">
+                                    📥 Baixar XMLs
+                                    <div class="tooltip-side">
+                                        <span class="tooltip-title">💡 Como importar os dados:</span>
+                                        <ol>
+                                            <li>Uma Nova Aba será aberta;</li>
+                                            <li>Aguarde Carregar os Dados;</li>
+                                            <li>Clique com o Botão Direito do Mouse e "Salvar";</li>
+                                            <li>Salve o(s) Arquivo(s) em seu Dispositivo;</li>
+                                            <li>Clique em "Selecionar XMLs" logo abaixo e importe.</li>
+                                        </ol>
+                                    </div>
+                                </button>
+                                
+                                <input type="file" id="xmlFile" accept=".xml" multiple style="display: none;">
+                                <button class="dropdown-item" onclick="document.getElementById('xmlFile').click()">
+                                    📂 Selecionar XMLs
+                                </button>
+                                
+                                <button class="dropdown-item" onclick="exportarSnapshot()">
+                                    💾 Exportar Dashboard
+                                    <div class="tooltip-side">
+                                        💡 Salvar o Arquivo com os Dados Já Carregados
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="download-section" id="downloadSection" style="display: none;">
+            <div class="download-title">📍 Selecione a Região e o Estado</div>
+            
+            <div class="regions-wrapper">
+                <div class="region-block">
+                    <div class="region-name" onclick="toggleUFs('sul')">Sul <span class="region-arrow" id="arrow-sul">▼</span></div>
+                    <div class="ufs-container" id="ufs-sul" style="display: none;">
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/PR/medidores.xml" target="_blank" class="uf-download-btn">PR</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/SC/medidores.xml" target="_blank" class="uf-download-btn">SC</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/RS/medidores.xml" target="_blank" class="uf-download-btn">RS</a>
+                    </div>
+                </div>
+
+                <div class="region-block">
+                    <div class="region-name" onclick="toggleUFs('sudeste')">Sudeste <span class="region-arrow" id="arrow-sudeste">▼</span></div>
+                    <div class="ufs-container" id="ufs-sudeste" style="display: none;">
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/SP/medidores.xml" target="_blank" class="uf-download-btn">SP</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/RJ/medidores.xml" target="_blank" class="uf-download-btn">RJ</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/MG/medidores.xml" target="_blank" class="uf-download-btn">MG</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/ES/medidores.xml" target="_blank" class="uf-download-btn">ES</a>
+                    </div>
+                </div>
+
+                <div class="region-block">
+                    <div class="region-name" onclick="toggleUFs('centro')">Centro-Oeste <span class="region-arrow" id="arrow-centro">▼</span></div>
+                    <div class="ufs-container" id="ufs-centro" style="display: none;">
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/MS/medidores.xml" target="_blank" class="uf-download-btn">MS</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/MT/medidores.xml" target="_blank" class="uf-download-btn">MT</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/GO/medidores.xml" target="_blank" class="uf-download-btn">GO</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/DF/medidores.xml" target="_blank" class="uf-download-btn">DF</a>
+                    </div>
+                </div>
+
+                <div class="region-block">
+                    <div class="region-name" onclick="toggleUFs('nordeste')">Nordeste <span class="region-arrow" id="arrow-nordeste">▼</span></div>
+                    <div class="ufs-container" id="ufs-nordeste" style="display: none;">
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/AL/medidores.xml" target="_blank" class="uf-download-btn">AL</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/BA/medidores.xml" target="_blank" class="uf-download-btn">BA</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/CE/medidores.xml" target="_blank" class="uf-download-btn">CE</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/MA/medidores.xml" target="_blank" class="uf-download-btn">MA</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/PB/medidores.xml" target="_blank" class="uf-download-btn">PB</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/PE/medidores.xml" target="_blank" class="uf-download-btn">PE</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/PI/medidores.xml" target="_blank" class="uf-download-btn">PI</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/RN/medidores.xml" target="_blank" class="uf-download-btn">RN</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/SE/medidores.xml" target="_blank" class="uf-download-btn">SE</a>
+                    </div>
+                </div>
+
+                <div class="region-block">
+                    <div class="region-name" onclick="toggleUFs('norte')">Norte <span class="region-arrow" id="arrow-norte">▼</span></div>
+                    <div class="ufs-container" id="ufs-norte" style="display: none;">
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/AC/medidores.xml" target="_blank" class="uf-download-btn">AC</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/AP/medidores.xml" target="_blank" class="uf-download-btn">AP</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/AM/medidores.xml" target="_blank" class="uf-download-btn">AM</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/PA/medidores.xml" target="_blank" class="uf-download-btn">PA</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/RO/medidores.xml" target="_blank" class="uf-download-btn">RO</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/RR/medidores.xml" target="_blank" class="uf-download-btn">RR</a>
+                        <a href="https://servicos.rbmlq.gov.br/dados-abertos/TO/medidores.xml" target="_blank" class="uf-download-btn">TO</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="steps-container">
+        <div class="step-card">
+            <div class="step-header">
+                <div class="step-number" style="background: var(--pastel-emerald)">1</div>
+                <h2 class="step-title">🔍 Smart Search</h2>
+            </div>
+            <div class="filters-section">
+                <input type="text" id="txtBusca" placeholder='Buscar...'>
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Estado</label>
+                        <select id="selEstado"><option value="Todos">Todos os Estados</option></select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Município</label>
+                        <select id="selMun"><option value="Todos">Todos os Municípios</option></select>
+                    </div>
+                    <div class="action-buttons-inline">
+                        <button class="action-btn-compact active" style="background: #334155" onclick="setFiltroStatus('Todos', this)">Todos</button>
+                        <button class="action-btn-compact" style="background: var(--pastel-emerald)" onclick="setFiltroStatus('Regular', this)">Regulares</button>
+                        <button class="action-btn-compact" style="background: var(--pastel-rose)" onclick="setFiltroStatus('Vencido', this)">Vencidos</button>
+                    </div>
+                </div>
+                <div class="via-selector" id="viaSelector"></div>
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-header">
+                <div class="step-number" style="background: var(--pastel-purple)">📊</div>
+                <h2 class="step-title">Resultados</h2>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">Estados</div><div class="stat-value" id="sUFs">0</div></div>
+                <div class="stat-card"><div class="stat-label">Total Únicos</div><div class="stat-value" id="sTotal">0</div></div>
+                <div class="stat-card"><div class="stat-label">Filtrados</div><div class="stat-value" id="sFiltrado">0</div></div>
+            </div>
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th onclick="ordenar('uf')">UF ↕</th>
+                                <th onclick="ordenar('mun')">Município ↕</th>
+                                <th onclick="ordenar('vel')">Vel. Nominal ↕</th>
+                                <th onclick="ordenar('local')">Local ↕</th>
+                                <th onclick="ordenar('data')">Validade ↕</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody"><tr><td colspan="5" style="text-align: center; padding: 40px">Carregue arquivos XML...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="detalhesModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>📋 Detalhes do Radar</h2>
+            <button style="background:none; border:none; color:white; font-size:2rem; cursor:pointer; line-height:1;" onclick="fecharModal()">×</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+let rawData = [];
+let filteredData = [];
+let orderDir = 1;
+let statusFiltro = 'Todos';
+
+const regioesUFs = {
+    'Sul': {ufs: ['PR', 'SC', 'RS'], classe: 'uf-sul'},
+    'Sudeste': {ufs: ['SP', 'RJ', 'MG', 'ES'], classe: 'uf-sudeste'},
+    'Centro-Oeste': {ufs: ['GO', 'MT', 'MS', 'DF'], classe: 'uf-centro'},
+    'Norte/Nordeste': {ufs: ['AC', 'AM', 'AP', 'PA', 'RO', 'RR', 'TO', 'AL', 'BA', 'CE', 'MA', 'PB', 'PE', 'PI', 'RN', 'SE'], classe: 'uf-norte'}
+};
+
+window.onload = function() {
+    document.getElementById('xmlFile').addEventListener('change', carregarXML);
+    document.getElementById('selEstado').addEventListener('change', () => {
+    atualizarMunicipios(document.getElementById('selEstado').value);
+    aplicarFiltros();
+});
+    document.getElementById('selMun').addEventListener('change', aplicarFiltros);
+    document.getElementById('txtBusca').addEventListener('input', aplicarFiltros);
+};
+
+window.onclick = function(e) {
+    if (e.target.id === 'detalhesModal') fecharModal();
+    
+    if (!e.target.matches('.dropdown-btn-icon') && !e.target.closest('.dropdown-btn-icon')) {
+        const menu = document.getElementById("menuContent");
+        if (menu && menu.classList.contains('show')) {
+            menu.classList.remove('show');
+        }
+    }
+};
+
+function toggleMenu(event) {
+    event.stopPropagation();
+    document.getElementById("menuContent").classList.toggle("show");
+}
+
+function removerAcentos(str) {
+    if (!str) return '';
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function getKmRadar(localText) {
+    const match = localText.match(/KM\s*([\d.,+]+)/i);
+    if (match) {
+        const valStr = match[1].replace(/\+/g, '.').replace(/,/g, '.');
+        return parseFloat(valStr);
+    }
+    return null;
+}
+
+function formatCategoriaBadge(categoria) {
+    if (categoria === 'Federal (BR)') return '<span class="badge-federal">Federal (BR)</span>';
+    if (categoria === 'Rodovias') return '<span class="badge-rodovias">Rodovias</span>';
+    return '<span class="badge-urbano">Urbano/Outros</span>';
+}
+
+function formatBadge(texto) {
+    if (!texto || texto === '-') return "-";
+    const t = texto.toUpperCase();
+    if (t.includes("APROVADO") || t.includes("REGULAR")) return `<span class="badge badge-regular">${texto}</span>`;
+    if (t.includes("REPROVADO") || t.includes("VENCIDO")) return `<span class="badge badge-vencido">${texto}</span>`;
+    if (t.includes("INSTALADO")) return `<span class="badge badge-instalado">${texto}</span>`;
+    return texto;
+}
+
+function gerarChaveRadar(mun, local) {
+    let str = removerAcentos(local.toUpperCase());
+    str = str.replace(/\b(N|NO|NR|NUMERO|KM|AV|AVENIDA|RUA|RODOVIA|ROD)\b/g, '');
+    str = str.replace(/[^A-Z0-9]/g, '');
+    return removerAcentos(mun.toUpperCase()) + "_" + str;
+}
+
+function deduplicarRadares(dados) {
+    const mapa = new Map();
+    for (let r of dados) {
+        const chave = gerarChaveRadar(r.mun, r.local);
+        if (!mapa.has(chave)) {
+            mapa.set(chave, r);
+        } else {
+            const existente = mapa.get(chave);
+            if (existente.vencido && !r.vencido) {
+                mapa.set(chave, r);
+            }
+        }
+    }
+    return Array.from(mapa.values());
+}
+
+function buscarMatematica(r, buscaRaw) {
+    const localNormalizado = removerAcentos(r.local.toUpperCase());
+    const munNormalizado = removerAcentos(r.mun.toUpperCase());
+    const textoCompleto = munNormalizado + " " + localNormalizado; 
+
+    let query = removerAcentos(buscaRaw.toUpperCase().trim());
+
+    let rangeMin = null, rangeMax = null;
+    const rangeRegex = /(?:KM\s*)?(\d+)\s*(?:A|-|ATE)\s*(\d+)/i;
+    const rangeMatch = query.match(rangeRegex);
+    if (rangeMatch) {
+        rangeMin = parseFloat(rangeMatch[1]);
+        rangeMax = parseFloat(rangeMatch[2]);
+        query = query.replace(rangeRegex, '').trim();
+    }
+
+    if (rangeMin !== null && rangeMax !== null) {
+        const rMin = Math.min(rangeMin, rangeMax), rMax = Math.max(rangeMin, rangeMax);
+        let matchRange = false;
+        
+        const radarKm = getKmRadar(r.local);
+        if (radarKm !== null && radarKm >= rMin && radarKm <= rMax) {
+            matchRange = true;
+        } else {
+            const numsInLocal = [...localNormalizado.matchAll(/\b(\d+)\b/g)].map(m => parseFloat(m[1]));
+            for(let n of numsInLocal) {
+                if(n >= rMin && n <= rMax) {
+                    matchRange = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!matchRange) return false;
+    }
+
+    const numRegex = /\b(\d+)\b/g;
+    let numbers = [], numMatch;
+    while ((numMatch = numRegex.exec(query)) !== null) numbers.push(numMatch[1]);
+    
+    for (let num of numbers) {
+        let found = localNormalizado.includes(num);
+        if (!found) {
+            const radarKm = getKmRadar(r.local);
+            if (radarKm !== null && Math.floor(radarKm) === parseFloat(num)) found = true;
+        }
+        if (!found) return false;
+    }
+
+    query = query.replace(numRegex, '').replace(/[.]/g, '').trim();
+
+    let blocks = query.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    if (blocks.length > 0) {
+        let cityOrBlocks = [];
+        let andBlocks = [];
+        
+        for (let b of blocks) {
+            if (window.allMuns && window.allMuns.includes(b)) {
+                cityOrBlocks.push(b);
+            } else {
+                andBlocks.push(b);
+            }
+        }
+        
+        if (cityOrBlocks.length > 0) {
+            let cityMatch = false;
+            for (let cb of cityOrBlocks) {
+                if (munNormalizado === cb) {
+                    cityMatch = true;
+                    break;
+                }
+            }
+            if (!cityMatch) return false;
+        }
+        
+        for (let ab of andBlocks) {
+            let terms = ab.split(/\s+/);
+            for (let term of terms) {
+                if (!textoCompleto.includes(term)) return false;
+            }
+        }
+    }
+    return true;
+}
+
+function extrairFicha(medidor, uf, resultado) {
+    const getVal = (tag) => {
+        const el = medidor.getElementsByTagName(tag)[0];
+        return el ? el.textContent : '';
+    };
+    
+    const proprietarioNome = getVal('Nome') || 'Não informado';
+    const dataVerif = getVal('DataUltimaVerificacao') || '-';
+    
+    const marca = getVal('Marca');
+    const modelo = getVal('Modelo');
+    let marcaModelo = '';
+    if (marca || modelo) {
+        marcaModelo = `${marca || '-'} / ${modelo || '-'}`;
+    } else {
+        marcaModelo = getVal('TipoMedidor') || '-';
+    }
+    
+    const portaria = getVal('PortariaAprovacaoModelo') || getVal('PortariaAprovacao') || getVal('Portaria') || '-';
+    
+    const faixas = [];
+    const faixasEl = medidor.getElementsByTagName('Faixa');
+    Array.from(faixasEl).forEach(f => {
+        const getFaixaVal = (tag) => {
+            const el = f.getElementsByTagName(tag)[0];
+            return el ? el.textContent : '';
+        };
+        
+        faixas.push({
+            num: getFaixaVal('NumeroFaixa') || '-',
+            desc: getFaixaVal('Descricao') || getFaixaVal('DescricaoFaixa') || '-',
+            inmetro: getFaixaVal('NumeroInmetro') || '-',
+            serie: getFaixaVal('NumeroSerie') || '-',
+            sentido: getFaixaVal('Sentido') || '-',
+            vel: getFaixaVal('VelocidadeNominal') || '-'
+        });
+    });
+    
+    const historico = [];
+    const certsEl = medidor.getElementsByTagName('Certificado');
+    Array.from(certsEl).forEach(c => {
+        const getCVal = (tag) => {
+            const el = c.getElementsByTagName(tag)[0];
+            return el ? el.textContent : '-';
+        };
+        
+        historico.push({
+            cert: getCVal('NumeroCertificado'),
+            ensaio: getCVal('NumeroEnsaio'),
+            ano: getCVal('Ano'),
+            laudo: getCVal('DataLaudo'),
+            validade: getCVal('DataValidade'),
+            tipo: getCVal('TipoServico'),
+            resultado: getCVal('Resultado')
+        });
+    });
+    
+    return {
+        responsavel: proprietarioNome,
+        dataVerif: dataVerif,
+        resultado: resultado || '-',
+        marcaModelo: marcaModelo,
+        portaria: portaria,
+        faixas: faixas,
+        historico: historico
+    };
+}
+
+function processarXML(xmlString) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+    const medidores = xmlDoc.getElementsByTagName('DadosAbertosMedidoresVelocidade');
+    Array.from(medidores).forEach(m => {
+        const getVal = (t) => m.getElementsByTagName(t)[0]?.textContent || '';
+        const uf = getVal('SiglaUf'), mun = getVal('Municipio'), local = getVal('LocalVerificacao'), data = getVal('DataValidade');
+        const resultado = getVal('UltimoResultado');
+        
+        const ficha = extrairFicha(m, uf, resultado);
+        
+        rawData.push({
+            uf, mun, local, data: data || '-', 
+            cat: categorizar(local), 
+            regiao: getRegiaoClasse(uf), 
+            vencido: isVencido(data),
+            ficha: ficha,
+            vel: (ficha.faixas && ficha.faixas.length > 0 && ficha.faixas[0].vel !== '-') ? ficha.faixas[0].vel : '?'
+        });
+    });
+}
+
+function carregarXML(event) {
+    const files = Array.from(event.target.files);
+    let loaded = 0;
+    rawData = [];
+    
+    files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            processarXML(e.target.result);
+            if (++loaded === files.length) finalizarCarregamento();
+        };
+        reader.readAsText(file);
+    });
+}
+
+function finalizarCarregamento() {
+    rawData = deduplicarRadares(rawData);
+    filteredData = [...rawData];
+    window.allMuns = [...new Set(rawData.map(r => removerAcentos(r.mun.toUpperCase())))];
+    popularFiltros();
+    render();
+    mostrarToast("✅ Arquivos carregados e interface otimizada!");
+    
+    document.getElementById("menuContent").classList.remove('show');
+}
+
+function categorizar(l) {
+    l = l.toUpperCase();
+    if (l.includes('BR-') || l.includes('BR ')) return 'Federal (BR)';
+    if (l.match(/\b[A-Z]{2}[-\s]\d/)) return 'Rodovias';
+    return 'Urbano/Outros';
+}
+
+function getRegiaoClasse(uf) {
+    for (let r in regioesUFs) if (regioesUFs[r].ufs.includes(uf)) return regioesUFs[r].classe;
+    return '';
+}
+
+function isVencido(d) {
+    if (!d || d === '-') return false;
+    const p = d.split('/');
+    return new Date(p[2], p[1]-1, p[0]) < new Date();
+}
+
+function atualizarMunicipios(uf) {
+    const selMun = document.getElementById('selMun');
+    const muns = uf === 'Todos' 
+                 ? [...new Set(rawData.map(r => r.mun))] 
+                 : [...new Set(rawData.filter(r => r.uf === uf).map(r => r.mun))];
+                 
+    const atualMun = selMun.value;
+    selMun.innerHTML = `<option value="Todos">Todos</option>`;
+    muns.sort().forEach(v => selMun.innerHTML += `<option value="${v}">${v}</option>`);
+    
+    if (muns.includes(atualMun)) {
+        selMun.value = atualMun;
+    } else {
+        selMun.value = 'Todos';
+    }
+}
+
+function popularFiltros() {
+    const fill = (id, arr) => {
+        const s = document.getElementById(id);
+        s.innerHTML = `<option value="Todos">Todos</option>`;
+        [...new Set(arr)].sort().forEach(v => s.innerHTML += `<option value="${v}">${v}</option>`);
+    };
+    fill('selEstado', rawData.map(r => r.uf));
+    atualizarMunicipios('Todos');
+    
+    const vs = document.getElementById('viaSelector');
+    vs.innerHTML = '';
+    ['Federal (BR)', 'Rodovias', 'Urbano/Outros'].forEach(v => {
+        const cls = v.includes('Federal') ? 'federal' : v.includes('Rodovias') ? 'rodovias' : 'urbano';
+        vs.innerHTML += `<div class="via-item ${cls}"><input type="checkbox" checked onchange="aplicarFiltros()"> <label>${v}</label></div>`;
+    });
+}
+
+function aplicarFiltros() {
+    const uf = document.getElementById('selEstado').value;
+    const mun = document.getElementById('selMun').value;
+    const busca = document.getElementById('txtBusca').value;
+    const vias = Array.from(document.querySelectorAll('#viaSelector input:checked')).map(c => c.nextElementSibling.textContent);
+
+    filteredData = rawData.filter(r => {
+        if (uf !== 'Todos' && r.uf !== uf) return false;
+        if (mun !== 'Todos' && r.mun !== mun) return false;
+        if (!vias.includes(r.cat)) return false;
+        if (statusFiltro === 'Regular' && r.vencido) return false;
+        if (statusFiltro === 'Vencido' && !r.vencido) return false;
+        if (busca && !buscarMatematica(r, busca)) return false;
+        return true;
+    });
+    render();
+}
+
+function setFiltroStatus(s, b) {
+    statusFiltro = s;
+    document.querySelectorAll('.action-btn-compact').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    aplicarFiltros();
+}
+
+function render() {
+    document.getElementById('sUFs').textContent = [...new Set(filteredData.map(r => r.uf))].length;
+    document.getElementById('sTotal').textContent = rawData.length;
+    document.getElementById('sFiltrado').textContent = filteredData.length;
+    const tb = document.getElementById('tbody');
+    tb.innerHTML = filteredData.slice(0, 500).map((r, i) => `
+        <tr onclick="abrirFicha(${i})">
+            <td class="${r.regiao}">${r.uf}</td>
+            <td>${r.mun}</td>
+            <td><span class="badge badge-regular" style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.1);">${r.vel} km/h</span></td>
+            <td>${formatCategoriaBadge(r.cat)} ${r.local}</td>
+            <td>${r.data}</td>
+            <td><span class="badge ${r.vencido ? 'badge-vencido' : 'badge-regular'}">${r.vencido ? 'Vencido' : 'Regular'}</span></td>
+        </tr>
+    `).join('');
+}
+
+function abrirFicha(index) {
+    const r = filteredData[index];
+    const f = r.ficha;
+    
+    let faixasHTML = f.faixas.map(fx => `
+        <tr>
+            <td>${fx.num}</td>
+            <td>${fx.desc}</td>
+            <td>${fx.inmetro}</td>
+            <td>${fx.serie}</td>
+            <td>${fx.sentido}</td>
+            <td>${fx.vel}</td>
+        </tr>
+    `).join('');
+    if (!faixasHTML) faixasHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted)">Nenhuma faixa registrada</td></tr>';
+    
+    let histHTML = f.historico.map(h => {
+        const urlImpressao = `https://servicos.rbmlq.gov.br/Certificado/Consulta?numero=${h.cert}`;
+        return `
+        <tr>
+            <td>${h.cert}</td>
+            <td>${h.ensaio}</td>
+            <td>${h.ano}</td>
+            <td>${h.laudo}</td>
+            <td>${h.validade}</td>
+            <td>${h.tipo}</td>
+            <td>${formatBadge(h.resultado)}</td>
+            <td style="text-align: center;">
+                ${h.cert && h.cert !== '-' ? `<a href="${urlImpressao}" target="_blank" class="btn-imprimir" title="Tentar abrir no Inmetro" onclick="event.stopPropagation();">🖨️ Imprimir</a>` : '-'}
+            </td>
+        </tr>
+        `;
+    }).join('');
+    if (!histHTML) histHTML = '<tr><td colspan="8" style="text-align:center; color: var(--text-muted)">Nenhum histórico disponível</td></tr>';
+    
+    document.getElementById('modalBody').innerHTML = `
+        <div class="ficha-header-grid">
+            <div class="fh-item">
+                <div class="fh-label">Proprietário / Responsável</div>
+                <div class="fh-val"><strong>${f.responsavel}</strong></div>
+            </div>
+            <div class="fh-item">
+                <div class="fh-label">Município</div>
+                <div class="fh-val">${r.mun} - ${r.uf}</div>
+            </div>
+            <div class="fh-item">
+                <div class="fh-label">Data da Verificação</div>
+                <div class="fh-val">${f.dataVerif}</div>
+            </div>
+            <div class="fh-item">
+                <div class="fh-label">Data Validade</div>
+                <div class="fh-val">${r.data}</div>
+            </div>
+            <div class="fh-item">
+                <div class="fh-label">Resultado</div>
+                <div class="fh-val">${formatBadge(f.resultado)}</div>
+            </div>
+            <div class="fh-item">
+                <div class="fh-label">Local</div>
+                <div class="fh-val">${r.local}</div>
+            </div>
+            <div class="fh-item">
+                <div class="fh-label">Marca/Modelo</div>
+                <div class="fh-val">${f.marcaModelo}</div>
+            </div>
+            <div class="fh-item">
+                <div class="fh-label">Portaria de Aprovação</div>
+                <div class="fh-val">${f.portaria}</div>
+            </div>
+        </div>
+        
+        <h3 class="section-title">📍 Faixas do Medidor</h3>
+        <div class="table-responsive" style="margin-bottom: 24px;">
+            <table class="nested-table">
+                <thead>
+                    <tr>
+                        <th>Nº da Faixa</th>
+                        <th>Descrição</th>
+                        <th>Nº do Inmetro</th>
+                        <th>Nº de Série</th>
+                        <th>Sentido</th>
+                        <th>Vel. Nominal</th>
+                    </tr>
+                </thead>
+                <tbody>${faixasHTML}</tbody>
+            </table>
+        </div>
+        
+        <h3 class="section-title">📜 Histórico do Medidor</h3>
+        <div class="table-responsive">
+            <table class="nested-table">
+                <thead>
+                    <tr>
+                        <th>Nº Certificado</th>
+                        <th>Nº Ensaio</th>
+                        <th>Ano</th>
+                        <th>Dt. Laudo</th>
+                        <th>Dt. Validade</th>
+                        <th>Tipo Serviço</th>
+                        <th>Resultado</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>${histHTML}</tbody>
+            </table>
+        </div>
+    `;
+    
+    document.getElementById('detalhesModal').classList.add('active');
+}
+
+function fecharModal() { document.getElementById('detalhesModal').classList.remove('active'); }
+function mostrarToast(m) { const t = document.createElement('div'); t.className='toast'; t.textContent=m; document.body.appendChild(t); setTimeout(()=>t.remove(), 3000); }
+function ordenar(c) { 
+    orderDir *= -1; 
+    filteredData.sort((a,b) => {
+        if (c === 'data') {
+            const parseDate = (d) => {
+                if (!d || d === '-') return 0;
+                const p = d.split('/');
+                return p.length === 3 ? new Date(p[2], p[1]-1, p[0]).getTime() : 0;
+            };
+            return (parseDate(a[c]) - parseDate(b[c])) * orderDir;
+        } else if (c === 'vel') {
+            const valA = parseInt(a[c]) || 0;
+            const valB = parseInt(b[c]) || 0;
+            return (valA - valB) * orderDir;
+        }
+        return a[c].toString().localeCompare(b[c].toString()) * orderDir; 
+    }); 
+    render(); 
+}
+
+function toggleDownloadSection(event) { 
+    event.stopPropagation();
+    const s = document.getElementById('downloadSection'); 
+    s.style.display = s.style.display === 'none' ? 'block' : 'none'; 
+    document.getElementById("menuContent").classList.remove('show');
+}
+
+function toggleUFs(reg) {
+    const c = document.getElementById(`ufs-${reg}`);
+    c.style.display = c.style.display === 'none' ? 'grid' : 'none';
+}
+
+function exportarSnapshot() {
+    const html = document.documentElement.outerHTML.replace('let rawData = [];', `let rawData = ${JSON.stringify(rawData)};`);
+    const blob = new Blob([html], {type:'text/html'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Dashboard_Radar_Snapshot.html'; a.click();
+    mostrarToast('💾 Snapshot exportado com sucesso!');
+    document.getElementById("menuContent").classList.remove('show');
+}
+</script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('PWA: Service Worker registrado'))
+                    .catch(err => console.log('PWA: Erro no registro', err));
+            });
+        }
+    </script>
+</body>
+</html>
