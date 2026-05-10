@@ -1,0 +1,29 @@
+name: Robo Radar 360
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Baixar XMLs e Atualizar Dashboard
+        run: python atualizador.py
+
+      - name: Guardar as alterações no GitHub
+        run: |
+          git config --global user.name "Robo Radar"
+          git config --global user.email "robo@radar360.com"
+          git add index.html
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Automacao: Atualizacao Diaria de Radares" && git push)
