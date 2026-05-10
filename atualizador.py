@@ -32,7 +32,7 @@ def get_regiao_classe(uf):
 for uf in ufs:
     url = f"https://servicos.rbmlq.gov.br/dados-abertos/{uf}/medidores.xml"
     try:
-        print(f"Baixando dados de {uf}...")
+        print(f"A baixar dados de {uf}...")
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         response = urllib.request.urlopen(req, timeout=20)
         root = ET.fromstring(response.read())
@@ -45,7 +45,6 @@ for uf in ufs:
             if faixas is not None and faixas.find('Faixa') is not None:
                 vel = get_text(faixas.find('Faixa'), 'VelocidadeNominal') or '?'
 
-            # Conversão de data segura
             is_vencido = False
             if data and data != '-':
                 try:
@@ -78,12 +77,14 @@ try:
         html = f.read()
 
     data_json = json.dumps(raw_data, ensure_ascii=False)
-    html = re.sub(r'let rawData = \[.*?\];', f'let rawData = {data_json};', html, flags=re.DOTALL)
-    html = re.sub(r'let filteredData = \[.*?\];', f'let filteredData = [];', html, flags=re.DOTALL)
+    
+    # CORREÇÃO: Usamos lambda para injetar os dados em segurança sem quebrar nada e o regex sem barras a mais!
+    html = re.sub(r'let rawData = \[.*?\];', lambda m: f'let rawData = {data_json};', html, flags=re.DOTALL)
+    html = re.sub(r'let filteredData = \[.*?\];', lambda m: f'let filteredData = [];', html, flags=re.DOTALL)
 
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(html)
         
-    print(f"Sucesso! {len(raw_data)} radares processados no Brasil.")
+    print(f"Sucesso! {len(raw_data)} radares injetados no Dashboard.")
 except Exception as e:
     print(f"Erro ao salvar index.html: {e}")
