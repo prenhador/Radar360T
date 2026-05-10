@@ -1,6 +1,26 @@
-- name: Guardar as alterações no GitHub
+name: Robo Radar 360
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Processar Dados
+        run: python botradar.py
+      - name: Guardar Ficheiro de Dados
         run: |
           git config --global user.name "Robo Radar"
           git config --global user.email "robo@radar360.com"
           git add dados.js
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Automacao: Atualizacao Diaria de Radares" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update: Dados Diários" && git push)
