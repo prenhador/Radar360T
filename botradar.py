@@ -6,7 +6,7 @@ import re
 from datetime import datetime
 import time
 
-# LISTA REDUZIDA: Apenas Paraná para teste rápido
+# Apenas Paraná por agora
 ufs = ['PR']
 raw_data = []
 
@@ -34,30 +34,21 @@ def get_regiao_classe(uf):
 
 for uf in ufs:
     url_oficial = f"https://servicos.rbmlq.gov.br/dados-abertos/{uf}/medidores.xml"
-    
-    # PLANO A, B e C para escapar aos bloqueios
     urls_para_tentar = [
-        f"https://api.allorigins.win/raw?url={urllib.parse.quote(url_oficial)}", # Plano A
-        f"https://api.codetabs.com/v1/proxy?quest={urllib.parse.quote(url_oficial)}", # Plano B
-        url_oficial # Plano C (Ligação direta)
+        f"https://api.allorigins.win/raw?url={urllib.parse.quote(url_oficial)}",
+        f"https://api.codetabs.com/v1/proxy?quest={urllib.parse.quote(url_oficial)}",
+        url_oficial
     ]
     
     sucesso = False
-    
     for tentativa_url in urls_para_tentar:
-        if sucesso: 
-            break
-            
+        if sucesso: break
         try:
-            print(f"A tentar baixar dados de {uf}...")
-            req = urllib.request.Request(tentativa_url, headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            })
+            print(f"Baixando {uf}...")
+            req = urllib.request.Request(tentativa_url, headers={'User-Agent': 'Mozilla/5.0'})
             response = urllib.request.urlopen(req, timeout=40)
-            xml_content = response.read()
-            root = ET.fromstring(xml_content)
+            root = ET.fromstring(response.read())
             
-            radares_estado = 0
             for medidor in root.findall('DadosAbertosMedidoresVelocidade'):
                 local = get_text(medidor, 'LocalVerificacao')
                 data = get_text(medidor, 'DataValidade')
@@ -70,52 +61,44 @@ for uf in ufs:
                 if data and data != '-':
                     try:
                         is_vencido = datetime.strptime(data, '%d/%m/%Y') < datetime.now()
-                    except:
-                        pass
+                    except: pass
 
                 raw_data.append({
-                    'uf': uf,
-                    'mun': get_text(medidor, 'Municipio'),
-                    'local': local,
-                    'data': data or '-',
-                    'cat': categorizar(local),
-                    'regiao': get_regiao_classe(uf),
-                    'vencido': is_vencido,
-                    'vel': vel,
+                    'uf': uf, 'mun': get_text(medidor, 'Municipio'), 'local': local,
+                    'data': data or '-', 'cat': categorizar(local), 'regiao': get_regiao_classe(uf),
+                    'vencido': is_vencido, 'vel': vel,
                     'ficha': {
                         'responsavel': get_text(medidor.find('Proprietario') if medidor.find('Proprietario') is not None else medidor, 'Nome') or 'Não informado',
-                        'dataVerif': get_text(medidor, 'DataUltimaVerificacao') or '-',
-                        'resultado': get_text(medidor, 'UltimoResultado') or '-',
-                        'marcaModelo': get_text(medidor, 'TipoMedidor'),
-                        'faixas': [], 'historico': []
+                        'dataVerif': get_text(medidor, 'DataUltimaVerificacao') or '-', 'resultado': get_text(medidor, 'UltimoResultado') or '-',
+                        'marcaModelo': get_text(medidor, 'TipoMedidor'), 'faixas': [], 'historico': []
                     }
                 })
-                radares_estado += 1
-                
-            print(f"-> ✅ {radares_estado} radares encontrados em {uf}!")
             sucesso = True
-            
-        except Exception as e:
+            print(f"-> Sucesso em {uf}!")
+        except:
             time.sleep(2)
-            
-    if not sucesso:
-        print(f"❌ Aviso crítico: Falha absoluta em {uf}. Servidor do Governo indisponível para este estado hoje.")
 
-# Gravar os dados no HTML
+# ==============================================================
+# O MÉTODO INFALÍVEL DE GRAVAÇÃO
+# ==============================================================
 try:
     if len(raw_data) > 0:
         with open('index.html', 'r', encoding='utf-8') as f:
             html = f.read()
 
         data_json = json.dumps(raw_data, ensure_ascii=False)
-        html = re.sub(r'let rawData = \[.*?\];', lambda m: f'let rawData = {data_json};', html, flags=re.DOTALL)
-        html = re.sub(r'let filteredData = \[.*?\];', lambda m: f'let filteredData = [];', html, flags=re.DOTALL)
+        
+        # 1. Primeiro, garantimos que transformamos os dados velhos (se existirem) num array vazio
+        html = re.sub(r'let rawData = \[.*?\];', 'let rawData = [];', html, flags=re.DOTALL)
+        
+        # 2. Agora fazemos a substituição exata da string, sem margem para erro
+        html = html.replace('let rawData = [];', f'let rawData = {data_json};')
 
         with open('index.html', 'w', encoding='utf-8') as f:
             f.write(html)
             
-        print(f"\n🎉 SUCESSO! {len(raw_data)} radares injetados no Dashboard.")
+        print(f"\n🎉 GRAVADO! {len(raw_data)} radares injetados no arquivo HTML fisicamente.")
     else:
-        print("\n❌ ERRO CRÍTICO: Nenhum dado foi baixado.")
+        print("\n❌ ERRO: O Robô não baixou nenhum radar.")
 except Exception as e:
-    print(f"Erro ao salvar index.html: {e}")
+    print(f"Erro Crítico ao tentar gravar o arquivo: {e}")
